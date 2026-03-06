@@ -164,6 +164,7 @@
       padding: 6px 8px;
       text-align: center;
       white-space: nowrap;
+      min-width: 70px;
     }
     th {
       background: rgba(255,255,255,0.7);
@@ -329,6 +330,32 @@
             </div>
           </div>
         </div>
+        <div class="field-row">
+          <div class="field">
+            <label>上半身護甲 Upper Armour</label>
+            <div class="field-inline">
+              <input type="number" id="upperArmour" min="0" value="0" />
+              <span class="suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>下半身護甲 Lower Armour</label>
+            <div class="field-inline">
+              <input type="number" id="lowerArmour" min="0" value="0" />
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>靴子閃避 Boots Evasion（Dodge）</label>
+            <div class="field-inline">
+              <input type="number" id="bootsEvasion" min="0" max="100" value="0" />
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+
 
         <hr />
 
@@ -399,13 +426,14 @@
             <thead>
               <tr>
                 <th>說明</th>
-                <th>Attack</th>
-                <th>Precision</th>
-                <th>Crit Chance</th>
-                <th>Crit Damage</th>
-                <th>Armor</th>
-                <th>Dodge</th>
-                <th>Health</th>
+                <th>攻擊</th>
+                <th>命中</th>
+                <th>暴率</th>
+                <th>暴傷</th>
+                <th>裝甲</th>
+                <th>閃避</th>
+                <th>生命</th>
+
               </tr>
             </thead>
             <tbody></tbody>
@@ -578,8 +606,12 @@
       const Dc_eq = extra.critDamageFromEquip || 0; // 以倍率加上，例如 +20% → 0.2
       const Dc_final = Dc_skill + Dc_eq;
 
-      const armor = ARMOR_TABLE[LAr];
-      const dodge = DODGE_TABLE[LDg];
+      const armorSkill = ARMOR_TABLE[LAr];
+      const dodgeSkill = DODGE_TABLE[LDg];
+      
+      const armor = armorSkill + (extra.armorFromEquip || 0);
+      const dodge = dodgeSkill + (extra.dodgeFromEquip || 0);
+
       const Hmax  = HEALTH_TABLE[LHp];
 
       return {
@@ -611,7 +643,7 @@
       return { hitsPerCycle, hitsPerDay, cycleDamage, dpd };
     }
 
-    // ===== 暴力搜尋：找單週期總傷害最大的組合 =====
+    // ===== 尋找單週期總傷害最大的組合 =====
     function findBestBuild(params) {
       const { playerLevel, hungerLevel, foodHeal, extra, extMul } = params;
 
@@ -675,7 +707,8 @@
           cost,
           expDmg: expD,
           cycleDamage: cyc.cycleDamage,
-          dpd: cyc.dpd
+          dpd: cyc.dpd,
+          hitsPerCycle: cyc.hitsPerCycle
         };
 
         if (!best) {
@@ -690,7 +723,7 @@
         }
       }
 
-      return { availableCombatPoints, best, dailyHealth };
+      return { availableCombatPoints, best, dailyHealth, hitsPerCycle: best.hitsPerCycle };
     }
 
     // ===== 主計算入口 =====
@@ -732,6 +765,15 @@
         extra.precisionFromEquip = toNumber("glovesPrecision") / 100;
         extra.critChanceFromEquip = toNumber("weaponCritChance") / 100;
         extra.critDamageFromEquip = toNumber("helmetCritDamage") / 100;
+        // 上身 / 下身裝甲、靴子閃避，作為額外 Armor / Dodge 百分比
+        const upperArmour = toNumber("upperArmour") / 100;
+        const lowerArmour = toNumber("lowerArmour") / 100;
+        const bootsEvasion = toNumber("bootsEvasion") / 100;
+        
+        // 這裡先把裝備裝甲 / 閃避視為「加在技能上的額外百分比」
+        extra.armorFromEquip = upperArmour + lowerArmour;
+        extra.dodgeFromEquip = bootsEvasion;
+
 
         const ammoM = getAmmoMultiplier();
         const pillM = getPillMultiplier();
@@ -783,10 +825,18 @@
         <td>${fmt2(bestResult.best.dpd)}</td>
       `;
       damageTbody.appendChild(trDmg);
+      const hitsPerCycle = bestResult.best.hitsPerCycle;
+      const bulletsPerCycle = hitsPerCycle;  // 每次攻擊消耗一發子彈
+      
+      const durabilityLossPerHit = 1; // 每次攻擊損耗 1% 耐久
+      const equipLossPercent = hitsPerCycle * durabilityLossPerHit; // 例如 30 次 → 30%
 
       const topDpdText = document.getElementById("topDpdText");
       topDpdText.textContent =
-        `目前在你的設定下，單週期總傷害約為 ${fmt2(bestResult.best.cycleDamage)}，DPD 約為 ${fmt2(bestResult.best.dpd)} 點傷害／日。`;
+        `目前在你的設定下，單週期總傷害約為 ${fmt2(bestResult.best.cycleDamage)}，` +
+        `DPD 約為 ${fmt2(bestResult.best.dpd)} 點傷害／日。` +
+        `每週期預計裝備損耗約 ${fmt2(equipLossPercent)}%，` +
+        `每週期預計使用約 ${fmt2(bulletsPerCycle)} 發子彈。`;
     }
 
     // ===== 綁定事件 =====
