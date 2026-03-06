@@ -213,90 +213,99 @@
     <h1>Warera 戰鬥技能加點與傷害計算器</h1>
     <p class="subtitle">輸入等級與參數，獲得穩健流／平衡流／爆發流的加點建議與傷害預估。</p>
 
-    <!-- 第一部分：基本資料 -->
-    <div class="card section-bg-basic">
-      <div class="card-header">
-        <span>第一部分：基本資料與技能點</span>
-      </div>
-      <div class="card-body">
-        <!-- 技能點計算 -->
-        <div class="field-row">
-          <div class="field">
-            <label>玩家等級</label>
-            <input type="number" id="levelInput" min="0" value="100" />
-            <div class="hint">總技能點 = 等級 × 4</div>
-          </div>
-          <div class="field">
-            <label>飽食技能已使用點數</label>
-            <input type="number" id="hungerSkillUsed" min="0" value="0" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>經濟技能 1 已使用點數</label>
-            <input type="number" id="ecoSkill1Used" min="0" value="0" />
-          </div>
-          <div class="field">
-            <label>經濟技能 2 已使用點數</label>
-            <input type="number" id="ecoSkill2Used" min="0" value="0" />
-          </div>
-          <div class="field">
-            <label>經濟技能 3 已使用點數</label>
-            <input type="number" id="ecoSkill3Used" min="0" value="0" />
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>已使用技能點總和</label>
-            <input type="text" id="usedPointsDisplay" readonly />
-          </div>
-          <div class="field">
-            <label>可用戰鬥技能點（Attack / Precision / Crit / Armor / Dodge / Life 用）</label>
-            <input type="text" id="availablePointsDisplay" readonly />
-            <div id="pointsWarning" class="warning" style="display:none;">已使用技能點超過等級可獲得的總點數。</div>
-          </div>
-        </div>
+<!-- 第一部分：基本資料與技能點（整個區塊長期顯示） -->
+<section id="section-basic">
+  <!-- 玩家等級與總技能點計算 -->
+  <div>
+    <label for="playerLevel">玩家等級：</label>
+    <!-- 輸入玩家等級，變動時觸發重新計算 -->
+    <input type="number" id="playerLevel" min="1" value="1" oninput="recalculatePoints()">
+  </div>
 
-        <hr />
+  <div>
+    <!-- 顯示總技能點（等級 × 4，自動計算，灰色不可編輯） -->
+    <label for="totalSkillPoints">總技能點（等級 × 4）：</label>
+    <input type="number" id="totalSkillPoints" value="4" readonly style="background-color:#eee;">
+  </div>
 
-        <!-- 每天體力總量 -->
-        <div class="field-row">
-          <div class="field">
-            <label>飽食上限</label>
-            <input type="number" id="hungerMaxInput" min="0" value="20" />
-          </div>
-          <div class="field">
-            <label>食品種類</label>
-            <div class="radio-group">
-              <label><input type="radio" name="foodType" value="10" checked /> 麵包（+10 體力）</label>
-              <label><input type="radio" name="foodType" value="20" /> 牛肉（+20 體力）</label>
-              <label><input type="radio" name="foodType" value="30" /> 魚肉（+30 體力）</label>
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>每天可回復體力總量</label>
-            <input type="text" id="dailyHealthDisplay" readonly />
-            <div class="hint">公式：飽食上限 × 食品單次回復量 × 2.4</div>
-          </div>
-        </div>
+  <!-- 飽食與經濟技能：改成輸入「技能等級」 -->
+  <div>
+    <label for="satietyLevel">飽食技能等級：</label>
+    <!-- 使用者輸入等級，內部會轉成已用點數 -->
+    <input type="number" id="satietyLevel" min="0" value="0" oninput="recalculatePoints()">
+  </div>
 
-        <hr />
+  <div>
+    <label for="econ1Level">創業（經濟技能 1）等級：</label>
+    <input type="number" id="econ1Level" min="0" value="0" oninput="recalculatePoints()">
+  </div>
 
-        <!-- 是否使用裝備最佳化 -->
-        <div class="field-row">
-          <div class="field">
-            <label>是否使用裝備與加成進行最佳化？</label>
-            <div class="radio-group">
-              <label><input type="radio" name="useAdvanced" value="no" checked /> 否，只顯示平衡流建議</label>
-              <label><input type="radio" name="useAdvanced" value="yes" /> 是，輸入裝備與加成後最佳化</label>
-            </div>
-            <div class="hint">選擇「是」會展開第二部分，並計算穩健流／平衡流／爆發流三種方案。</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <label for="econ2Level">打工（經濟技能 2）等級：</label>
+    <input type="number" id="econ2Level" min="0" value="0" oninput="recalculatePoints()">
+  </div>
+
+  <div>
+    <label for="econ3Level">生產力（經濟技能 3）等級：</label>
+    <input type="number" id="econ3Level" min="0" value="0" oninput="recalculatePoints()">
+  </div>
+
+  <!-- 這裡顯示後端由「技能等級」換算出的已使用點數與可用戰鬥點數 -->
+  <div>
+    <label for="usedSkillPoints">已使用技能點總和：</label>
+    <!-- 自動計算，灰色不可編輯 -->
+    <input type="number" id="usedSkillPoints" value="0" readonly style="background-color:#eee;">
+  </div>
+
+  <div>
+    <label for="availableBattleSkillPoints">可用戰鬥技能點：</label>
+    <!-- 自動計算（總技能點 - 已使用），灰色不可編輯 -->
+    <input type="number" id="availableBattleSkillPoints" value="0" readonly style="background-color:#eee;">
+  </div>
+
+  <!-- 如有超出總點數，在這裡顯示警告文字 -->
+  <p id="skillPointWarning" style="color:red; display:none;">
+    已使用技能點超過等級可獲得的總點數。
+  </p>
+
+  <!-- 飽食上限與每天可回復體力：照原本公式灰色顯示 -->
+  <div>
+    <label for="satietyMax">飽食上限：</label>
+    <!-- 自動計算或由飽食技能推算，如有需要可再補充公式 -->
+    <input type="number" id="satietyMax" value="0" readonly style="background-color:#eee;">
+  </div>
+
+  <div>
+    <label for="foodType">食品種類：</label>
+    <!-- 使用者選擇食品種類，改變單次回復量，並觸發每天可回復體力的計算 -->
+    <select id="foodType" onchange="recalculatePoints()">
+      <option value="10">麵包（+10 體力）</option>
+      <option value="20">牛肉（+20 體力）</option>
+      <option value="30">魚肉（+30 體力）</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="dailyStaminaRecovery">每天可回復體力總量：</label>
+    <!-- 公式：飽食上限 × 食品單次回復量 × 2.4，自動計算，灰色不可編輯 -->
+    <input type="number" id="dailyStaminaRecovery" value="0" readonly style="background-color:#eee;">
+  </div>
+
+  <!-- 是否進行最佳化：此處會控制第二部分顯示與否 -->
+  <div>
+    <p>是否使用裝備與加成進行最佳化？</p>
+    <!-- 預設「否」，但第一、三部分長期顯示；按「是」才顯示第二部分 -->
+    <label>
+      <input type="radio" name="useOptimization" value="no" checked onclick="toggleAdvanced(false)">
+      否，只顯示平衡流建議
+    </label>
+    <label>
+      <input type="radio" name="useOptimization" value="yes" onclick="toggleAdvanced(true)">
+      是，輸入裝備與加成後最佳化
+    </label>
+  </div>
+</section>
+
 
     <!-- 第二部分：裝備與加成（進階） -->
     <div class="card section-bg-advanced" id="advancedSection" style="display:none;">
