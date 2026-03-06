@@ -1,0 +1,861 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="zh-Hant"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Warera 戰鬥技能加點與傷害計算器&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>:root {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--blue-light: #e6f3ff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--green-light: #e6f8ea;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--purple-light: #f1e8ff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--blue-main: #2b7bb9;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--text-main: #222;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--border-color: #d0d7de;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--danger: #d93025;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--muted: #666;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--bg: #f7f9fb;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>* {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>"Noto Sans TC", system-ui, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--bg);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--text-main);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.container {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>max-width: 1100px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 0 auto;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>h1 {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--blue-main);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>p.subtitle {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--muted);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 14px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card-header {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 10px 14px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-bottom: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>justify-content: space-between;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card-body {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 12px 14px 16px 14px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.section-bg-basic {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--blue-light);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.section-bg-advanced {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--green-light);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.section-bg-result {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--purple-light);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field-row {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>flex-wrap: wrap;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>gap: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>flex: 1;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>min-width: 160px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field label {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 2px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field input[type="number"],</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field input[type="text"],</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field select {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 6px 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field-inline {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>gap: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field-inline span.suffix {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--muted);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.hint {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--muted);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 2px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.warning {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--danger);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.radio-group,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.slider-group {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.radio-group label {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-right: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>input[type="range"] {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: inline-block;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 8px 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 14px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 500;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-primary {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--blue-main);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-primary:disabled {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0.6;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: not-allowed;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-toggle {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 4px 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 4px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn-toggle.active {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: var(--blue-main);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-color: var(--blue-main);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.badge {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: inline-block;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 2px 6px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 999px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 11px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--muted);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-left: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>table {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-collapse: collapse;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>th, td {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid var(--border-color);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 6px 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>white-space: nowrap;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>th {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: rgba(255,255,255,0.7);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.table-wrapper {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>overflow-x: auto;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.dpd-highlight {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 18px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--blue-main);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.flow-name {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.flow-desc {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 11px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: var(--muted);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media (max-width: 768px) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.field {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>min-width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.card-header {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>font-size: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Warera 戰鬥技能加點與傷害計算器&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="subtitle"&gt;輸入等級與參數，獲得穩健流／平衡流／爆發流的加點建議與傷害預估。&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 第一部分：基本資料 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card section-bg-basic"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;第一部分：基本資料與技能點&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-body"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 技能點計算 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;玩家等級&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="levelInput" min="0" value="100" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="hint"&gt;總技能點 = 等級 × 4&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;飽食技能已使用點數&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="hungerSkillUsed" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;經濟技能 1 已使用點數&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="ecoSkill1Used" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;經濟技能 2 已使用點數&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="ecoSkill2Used" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;經濟技能 3 已使用點數&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="ecoSkill3Used" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;已使用技能點總和&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="text" id="usedPointsDisplay" readonly /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;可用戰鬥技能點（Attack / Precision / Crit / Armor / Dodge / Life 用）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="text" id="availablePointsDisplay" readonly /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="pointsWarning" class="warning" style="display:none;"&gt;已使用技能點超過等級可獲得的總點數。&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;hr /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 每天體力總量 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;飽食上限&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="hungerMaxInput" min="0" value="20" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;食品種類&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="radio-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="foodType" value="10" checked /&gt; 麵包（+10 體力）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="foodType" value="20" /&gt; 牛肉（+20 體力）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="foodType" value="30" /&gt; 魚肉（+30 體力）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;每天可回復體力總量&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="text" id="dailyHealthDisplay" readonly /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="hint"&gt;公式：飽食上限 × 食品單次回復量 × 2.4&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;hr /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 是否使用裝備最佳化 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;是否使用裝備與加成進行最佳化？&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="radio-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="useAdvanced" value="no" checked /&gt; 否，只顯示平衡流建議&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="useAdvanced" value="yes" /&gt; 是，輸入裝備與加成後最佳化&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="hint"&gt;選擇「是」會展開第二部分，並計算穩健流／平衡流／爆發流三種方案。&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 第二部分：裝備與加成（進階） --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card section-bg-advanced" id="advancedSection" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;第二部分：裝備與戰場加成（進階選項）&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="badge"&gt;進階&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-body"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 裝備數據 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Weapon - Damage&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="weaponDamage" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="hint"&gt;若不填寫，預設為 0。&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Weapon - Crit Chance&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="weaponCritChance" min="0" max="100" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Helmet - Crit Damage&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="helmetCritDamage" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Upper armour - Armour&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="upperArmour" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Lower armour - Armour&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="lowerArmour" min="0" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Boots - Evasion（Dodge）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="bootsEvasion" min="0" max="100" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Gloves - Precision&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="field-inline"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="number" id="glovesPrecision" min="0" max="100" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span class="suffix"&gt;%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;hr /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 彈藥 / Pill / 加成減益 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;子彈種類&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="radio-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="ammoType" value="1.4" checked /&gt; 重彈（+40% 傷害）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="ammoType" value="1.2" /&gt; 普通彈（+20%）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;label&gt;&lt;input type="radio" name="ammoType" value="1.1" /&gt; 輕彈（+10%）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;Pill 狀態&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="slider-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="range" id="pillSlider" min="0" max="2" step="1" value="1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="hint"&gt;三個刻度：-60%（0.4 倍）、0%（1.0 倍）、+60%（1.6 倍）&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div id="pillLabel" class="hint"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;戰場加成（0% ~ +80%）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="slider-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="range" id="buffSlider" min="0" max="80" step="5" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div id="buffLabel" class="hint"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;戰場減益（0% ~ -40%）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="slider-group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input type="range" id="debuffSlider" min="0" max="40" step="5" value="0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div id="debuffLabel" class="hint"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="field-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label&gt;軍階小階編號（1–120）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="number" id="rankStep" min="1" max="120" value="1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="hint"&gt;每小階 +0.25%，每完成 4 小階額外 +0.5%。&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 第三部分：結果 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card section-bg-result" id="resultSection" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;第三部分：技能加點建議與傷害預估&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card-body"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="margin-bottom: 10px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button class="btn btn-primary" id="calcButton"&gt;開始計算&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="resultWarning" class="warning" style="display:none;"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 加點建議表 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 style="font-size:16px;margin-top:10px;"&gt;技能加點建議&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="table-wrapper"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;table id="allocationTable"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;流派&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;說明&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Attack&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Precision&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Crit Chance&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Crit Damage&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Armor&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Dodge&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;Life&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;!-- 動態填入 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- 傷害結果表 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 style="font-size:16px;margin-top:16px;"&gt;傷害預估&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="table-wrapper"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;table id="damageTable"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;流派&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;單次期望傷害&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;單週期總傷害&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;th&gt;DPD（24 小時）&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;!-- 動態填入 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="margin-top:10px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="dpd-highlight" id="topDpdText"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 工具函式 =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function clamp(v, min, max) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return Math.min(max, Math.max(min, v));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function toNumber(id) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const v = parseFloat(document.getElementById(id).value);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return isNaN(v) ? 0 : v;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function fmt2(x) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return x.toFixed(2);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 初始化顯示 =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function updatePointsAndDaily() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const level = toNumber("levelInput");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const totalPoints = level * 4;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const hungerUsed = toNumber("hungerSkillUsed");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const eco1 = toNumber("ecoSkill1Used");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const eco2 = toNumber("ecoSkill2Used");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const eco3 = toNumber("ecoSkill3Used");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const used = hungerUsed + eco1 + eco2 + eco3;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const available = totalPoints - used;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("usedPointsDisplay").value = used;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("availablePointsDisplay").value = available;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const warn = document.getElementById("pointsWarning");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (available &lt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>warn.style.display = "block";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>warn.style.display = "none";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const hungerMax = toNumber("hungerMaxInput");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const foodTypeEls = document.querySelectorAll('input[name="foodType"]');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let foodValue = 10;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>foodTypeEls.forEach(el =&gt; { if (el.checked) foodValue = parseFloat(el.value); });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dailyHealth = hungerMax * foodValue * 2.4;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("dailyHealthDisplay").value = fmt2(dailyHealth);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function updateAdvancedVisibility() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const val = document.querySelector('input[name="useAdvanced"]:checked').value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const adv = document.getElementById("advancedSection");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (val === "yes") {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>adv.style.display = "block";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>adv.style.display = "none";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function updateSlidersLabel() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const pillSlider = document.getElementById("pillSlider");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const pillLabel = document.getElementById("pillLabel");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const idx = parseInt(pillSlider.value, 10);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let text = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (idx === 0) text = "當前 Pill：-60%（乘數 0.4）";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>else if (idx === 1) text = "當前 Pill：0%（乘數 1.0）";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>else text = "當前 Pill：+60%（乘數 1.6）";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>pillLabel.textContent = text;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const buffSlider = document.getElementById("buffSlider");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const buffLabel = document.getElementById("buffLabel");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>buffLabel.textContent = "戰場加成：" + buffSlider.value + "%";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const debuffSlider = document.getElementById("debuffSlider");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const debuffLabel = document.getElementById("debuffLabel");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>debuffLabel.textContent = "戰場減益：" + (debuffSlider.value === "0" ? "0%" : "-" + debuffSlider.value + "%");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function ensureResultVisible() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("resultSection").style.display = "block";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 戰鬥計算相關 =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getRankMultiplier(step) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// step: 1-120</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const s = clamp(step, 1, 120);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const smallBonus = s * 0.0025; // 0.25% per step</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const bigSteps = Math.floor((s - 1) / 4);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const bigBonus = bigSteps * 0.005; // 0.5% per big rank</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const total = smallBonus + bigBonus;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return 1 + total;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getPillMultiplier() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const idx = parseInt(document.getElementById("pillSlider").value, 10);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (idx === 0) return 0.4;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (idx === 1) return 1.0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return 1.6;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getBuffDebuffMultiplier() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const buff = parseFloat(document.getElementById("buffSlider").value) || 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const debuff = parseFloat(document.getElementById("debuffSlider").value) || 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const mBuff = 1 + buff / 100;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const mDebuff = 1 - debuff / 100;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return mBuff * mDebuff;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function getAmmoMultiplier() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const els = document.querySelectorAll('input[name="ammoType"]');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let v = 1.4;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>els.forEach(el =&gt; { if (el.checked) v = parseFloat(el.value); });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return v;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 期望傷害</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function computeExpectedDamage(baseAttack, precisionRate, critChanceRate, critDamageMult) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Miss -&gt; 0.5 * A, no crit</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const P = clamp(precisionRate, 0, 1);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const C = clamp(critChanceRate, 0, 1);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const A = baseAttack;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dmg = A * (0.5 * (1 - P) + P * (1 - C) + P * C * critDamageMult);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return dmg;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 簡化假設：每次攻擊消耗固定體力（讓使用者可以自行再改進）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const HEALTH_PER_HIT = 10;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function computeCycleAndDPD(expectedDamage, dailyHealth) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (HEALTH_PER_HIT &lt;= 0) return { cycle: 0, dpd: 0 };</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 週期：從滿 Health + Hunger 消耗完體力</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 這裡簡化用 dailyHealth / HEALTH_PER_HIT 作為可攻擊次數 proxy</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const hitsPerDay = dailyHealth / HEALTH_PER_HIT;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dpd = hitsPerDay * expectedDamage;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 一個「週期」可以理解為把當前 dailyHealth 都用完</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const cycle = hitsPerDay * expectedDamage;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return { cycle, dpd };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 三種流派的加點邏輯（簡化版） =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 所有戰鬥技能上限 10 等，成本 1+2+...+10=55 點；這裡我先假設每等成本 1 點，總可用點數直接分配（之後如要細化可改）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const STAT_NAMES = ["Attack", "Precision", "CritChance", "CritDamage", "Armor", "Dodge", "Life"];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function allocatePoints(mode, availablePoints) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// mode: "conservative" / "balanced" / "burst"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 簡單按比例分配，並限制 0~10 等</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let weights;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (mode === "conservative") {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 穩健流：重 Precision / Life / Armor</p>
+<p class="p1"><span class="Apple-converted-space">        </span>weights = {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Attack: 1.0,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Precision: 1.5,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritChance: 0.8,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritDamage: 0.7,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Armor: 1.2,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Dodge: 1.0,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Life: 1.3</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if (mode === "burst") {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 爆發流：重 Attack / CritDamage / CritChance</p>
+<p class="p1"><span class="Apple-converted-space">        </span>weights = {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Attack: 1.6,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Precision: 1.0,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritChance: 1.3,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritDamage: 1.5,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Armor: 0.6,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Dodge: 0.7,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Life: 0.8</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 平衡流</p>
+<p class="p1"><span class="Apple-converted-space">        </span>weights = {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Attack: 1.3,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Precision: 1.2,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritChance: 1.1,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>CritDamage: 1.1,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Armor: 0.9,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Dodge: 0.9,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Life: 1.0</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const totalWeight = STAT_NAMES.reduce((s, name) =&gt; s + weights[name], 0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const result = {};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>STAT_NAMES.forEach(name =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const alloc = (availablePoints * weights[name]) / totalWeight;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 將點數投成等級，最大 10</p>
+<p class="p1"><span class="Apple-converted-space">        </span>result[name] = clamp(Math.floor(alloc), 0, 10);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 簡單微調：如果還有剩餘點數，就依照 Attack &gt; Precision &gt; CritDamage &gt; CritChance &gt; Life &gt; Armor &gt; Dodge 的優先順序補到上限 10</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let used = STAT_NAMES.reduce((s, name) =&gt; s + result[name], 0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let remaining = availablePoints - used;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const order = ["Attack", "Precision", "CritDamage", "CritChance", "Life", "Armor", "Dodge"];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let idx = 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>while (remaining &gt; 0 &amp;&amp; idx &lt; order.length) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const key = order[idx];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (result[key] &lt; 10) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>result[key] += 1;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>remaining -= 1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>idx += 1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return result;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function levelToCombatStats(stats) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const La = stats.Attack;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const Lp = stats.Precision;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const Lcc = stats.CritChance;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const Lcd = stats.CritDamage;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Attack skill</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const A_skill = 100 + 20 * La;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Precision</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const P = clamp(0.5 + 0.05 * Lp, 0, 1.4); // 上限 140%，但超過 100% 當作 100% 處理可再調整</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const P_used = Math.min(P, 1.0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Crit Chance</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const C = clamp(0.1 + 0.05 * Lcc, 0, 1.0);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// Crit Damage（倍率）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const Dc = 1.0 + 0.2 * Lcd;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return { A_skill, P_used, C, Dc };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 主計算流程 =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function runCalculation() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ensureResultVisible();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const warningEl = document.getElementById("resultWarning");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>warningEl.style.display = "none";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>warningEl.textContent = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const availablePoints = parseInt(document.getElementById("availablePointsDisplay").value || "0", 10);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (isNaN(availablePoints) || availablePoints &lt;= 0) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>warningEl.textContent = "可用戰鬥技能點為 0 或無效，請確認等級與已用技能點設定。";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>warningEl.style.display = "block";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const useAdvanced = document.querySelector('input[name="useAdvanced"]:checked').value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const dailyHealth = parseFloat(document.getElementById("dailyHealthDisplay").value) || 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 乘數部分（進階才用）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let externalMultiplier = 1.0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (useAdvanced === "yes") {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const weaponDamage = toNumber("weaponDamage");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 這裡簡化：Weapon Damage 視作加到 Attack skill 上的額外固定值</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Armor / Dodge / Life 對輸出不直接加成，暫不入乘數</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const ammoM = getAmmoMultiplier();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const pillM = getPillMultiplier();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const buffDebuffM = getBuffDebuffMultiplier();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const rankStep = toNumber("rankStep");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const rankM = getRankMultiplier(rankStep);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>externalMultiplier = ammoM * pillM * buffDebuffM * rankM;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// weaponDamage 會在 baseAttack 中疊加</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 其他裝備加成（crit chance, crit dmg, precision, armor, dodge）會加在對應 stat 中</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 定義三種流派（若 useAdvanced=no，只計算平衡流）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const flows = useAdvanced === "yes"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>? [</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ key: "conservative", label: "穩健流", desc: "偏重命中與生存，減少傷害波動。" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ key: "balanced", label: "平衡流", desc: "兼顧命中與暴擊，在穩定與爆發之間取平衡。" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ key: "burst", label: "爆發流", desc: "偏重攻擊與暴擊倍率，追求最高爆發傷害。" }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>]</p>
+<p class="p1"><span class="Apple-converted-space">        </span>: [</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ key: "balanced", label: "平衡流", desc: "在可用技能點下給出一組較均衡的戰鬥加點。" }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const allocationTbody = document.querySelector("#allocationTable tbody");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const damageTbody = document.querySelector("#damageTable tbody");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>allocationTbody.innerHTML = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>damageTbody.innerHTML = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let bestDpd = -1;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let bestFlowLabel = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>flows.forEach(flow =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const alloc = allocatePoints(flow.key, Math.max(availablePoints, 0));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 基礎戰鬥技能</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const baseStats = levelToCombatStats(alloc);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let { A_skill, P_used, C, Dc } = baseStats;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 進階裝備加成調整</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (useAdvanced === "yes") {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const weaponDamage = toNumber("weaponDamage");</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const weaponCritChance = toNumber("weaponCritChance") / 100;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const helmetCritDamage = toNumber("helmetCritDamage") / 100;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const glovesPrecision = toNumber("glovesPrecision") / 100;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>A_skill += weaponDamage;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>C = clamp(C + weaponCritChance, 0, 1);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>Dc = Dc + helmetCritDamage;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>P_used = clamp(P_used + glovesPrecision, 0, 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 最終攻擊力</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const baseAttack = A_skill * (useAdvanced === "yes" ? externalMultiplier : 1.0);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const expected = computeExpectedDamage(baseAttack, P_used, C, Dc);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const cycleD = computeCycleAndDPD(expected, dailyHealth);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (cycleD.dpd &gt; bestDpd) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>bestDpd = cycleD.dpd;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>bestFlowLabel = flow.label;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 加點表</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const trAlloc = document.createElement("tr");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>trAlloc.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;&lt;div class="flow-name"&gt;${flow.label}&lt;/div&gt;&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;&lt;div class="flow-desc"&gt;${flow.desc}&lt;/div&gt;&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.Attack}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.Precision}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.CritChance}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.CritDamage}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.Armor}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.Dodge}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${alloc.Life}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>allocationTbody.appendChild(trAlloc);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 傷害表</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const trDmg = document.createElement("tr");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>trDmg.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${flow.label}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${fmt2(expected)}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${fmt2(cycleD.cycle)}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;td&gt;${fmt2(cycleD.dpd)}&lt;/td&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>damageTbody.appendChild(trDmg);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const topDpdText = document.getElementById("topDpdText");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (bestDpd &gt;= 0) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>topDpdText.textContent = `目前在你的設定下，DPD 最高的是「${bestFlowLabel}」，約為 ${fmt2(bestDpd)} 點傷害／日。`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>topDpdText.textContent = "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== 事件綁定 =====</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.addEventListener("DOMContentLoaded", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>updatePointsAndDaily();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>updateAdvancedVisibility();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>updateSlidersLabel();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("levelInput").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("hungerSkillUsed").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("ecoSkill1Used").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("ecoSkill2Used").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("ecoSkill3Used").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("hungerMaxInput").addEventListener("input", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.querySelectorAll('input[name="foodType"]').forEach(el =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.addEventListener("change", updatePointsAndDaily);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.querySelectorAll('input[name="useAdvanced"]').forEach(el =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>el.addEventListener("change", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>updateAdvancedVisibility();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("pillSlider").addEventListener("input", updateSlidersLabel);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("buffSlider").addEventListener("input", updateSlidersLabel);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("debuffSlider").addEventListener("input", updateSlidersLabel);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById("calcButton").addEventListener("click", runCalculation);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 第一部分一開始展開，結果區先不顯示，只有點「開始計算」後展開</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 已在 HTML 預設 display:none</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
