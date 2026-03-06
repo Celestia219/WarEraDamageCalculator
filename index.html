@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Warera 戰鬥技能加點與傷害計算器</title>
+  <title>Warera 加點與傷害計算器 v1.3 (0.23.4-beta)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -193,7 +193,6 @@
         font-size: 15px;
       }
     }
-    /* 讓唯讀輸入框視覺上呈現灰色，提醒用戶不可修改 */
     input[readonly] {
       background-color: #eee;
       color: #555;
@@ -412,7 +411,7 @@
       </div>
     </div>
 
-    <!-- 第三部分：結果（永遠顯示，只是內容需按按鈕計算） -->
+    <!-- 第三部分：結果 -->
     <div class="card section-bg-result" id="resultSection">
       <div class="card-header">
         <span>第三部分：技能加點建議與傷害預估</span>
@@ -424,7 +423,6 @@
 
         <div id="resultWarning" class="warning" style="display:none;"></div>
 
-        <!-- 加點建議表 -->
         <h3 style="font-size:16px;margin-top:10px;">技能加點建議</h3>
         <div class="table-wrapper">
           <table id="allocationTable">
@@ -442,12 +440,10 @@
               </tr>
             </thead>
             <tbody>
-              <!-- 動態填入 -->
             </tbody>
           </table>
         </div>
 
-        <!-- 傷害結果表 -->
         <h3 style="font-size:16px;margin-top:16px;">傷害預估</h3>
         <div class="table-wrapper">
           <table id="damageTable">
@@ -460,7 +456,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- 動態填入 -->
             </tbody>
           </table>
         </div>
@@ -473,10 +468,7 @@
   </div>
 
   <script>
-    // ========================
-    // 工具函式與通用設定
-    // ========================
-
+    // ========= 通用工具 =========
     function clamp(v, min, max) {
       return Math.min(max, Math.max(min, v));
     }
@@ -488,32 +480,23 @@
       return x.toFixed(2);
     }
 
-    // 統一技能等級 → 累積消耗點數表
-    // level: 0~10；0 等消耗 0 點
-    const LEVEL_COST_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 38, 45, 55];
-
+    // 技能等級 → 累積技能點消耗表
+    const LEVEL_COST_TABLE = [0,1,3,6,10,15,21,28,38,45,55];
     function levelToCost(level) {
-      // 超出範圍先夾在 0~10，再看對應的累積點數
       const lv = clamp(Math.floor(level), 0, 10);
       return LEVEL_COST_TABLE[lv];
     }
 
-    // ========================
-    // 第一部分：更新技能點與體力
-    // ========================
-
+    // ========= 第一部分：可用戰鬥點 + 體力 =========
     function updatePointsAndDaily() {
-      // 玩家等級與總技能點
       const level = toNumber("levelInput");
       const totalPoints = level * 4;
 
-      // 飢餓與三個經濟技能等級
       const hungerLv = toNumber("hungerLevel");
       const ecoLv1 = toNumber("ecoLevel1");
       const ecoLv2 = toNumber("ecoLevel2");
       const ecoLv3 = toNumber("ecoLevel3");
 
-      // 依照等級→累積成本，計算已用技能點
       const hungerCost = levelToCost(hungerLv);
       const ecoCost1 = levelToCost(ecoLv1);
       const ecoCost2 = levelToCost(ecoLv2);
@@ -526,47 +509,33 @@
       document.getElementById("availablePointsDisplay").value = available;
 
       const warn = document.getElementById("pointsWarning");
-      if (available < 0) {
-        warn.style.display = "block";
-      } else {
-        warn.style.display = "none";
-      }
+      warn.style.display = available < 0 ? "block" : "none";
 
-      // 飢餓上限：基礎 4 + 飢餓技能等級
       const hungerMax = 4 + hungerLv;
       document.getElementById("hungerMaxDisplay").value = hungerMax;
 
-      // 食物回復量
       const foodTypeEls = document.querySelectorAll('input[name="foodType"]');
       let foodValue = 10;
       foodTypeEls.forEach(el => { if (el.checked) foodValue = parseFloat(el.value); });
 
-      // 每天可回復體力總量：飢餓上限 × 食品單次回復量 × 2.4
       const dailyHealth = hungerMax * foodValue * 2.4;
       document.getElementById("dailyHealthDisplay").value = fmt2(dailyHealth);
     }
 
-    // 控制是否顯示進階裝備區塊
     function updateAdvancedVisibility() {
       const val = document.querySelector('input[name="useAdvanced"]:checked').value;
       const adv = document.getElementById("advancedSection");
-      if (val === "yes") {
-        adv.style.display = "block";
-      } else {
-        adv.style.display = "none";
-      }
+      adv.style.display = val === "yes" ? "block" : "none";
     }
 
-    // Pill / Buff / Debuff 滑桿文字
     function updateSlidersLabel() {
       const pillSlider = document.getElementById("pillSlider");
       const pillLabel = document.getElementById("pillLabel");
       const idx = parseInt(pillSlider.value, 10);
-      let text = "";
-      if (idx === 0) text = "當前 Pill：-60%（乘數 0.4）";
-      else if (idx === 1) text = "當前 Pill：0%（乘數 1.0）";
-      else text = "當前 Pill：+60%（乘數 1.6）";
-      pillLabel.textContent = text;
+      pillLabel.textContent =
+        idx === 0 ? "當前 Pill：-60%（乘數 0.4）" :
+        idx === 1 ? "當前 Pill：0%（乘數 1.0）" :
+                    "當前 Pill：+60%（乘數 1.6）";
 
       const buffSlider = document.getElementById("buffSlider");
       const buffLabel = document.getElementById("buffLabel");
@@ -574,38 +543,30 @@
 
       const debuffSlider = document.getElementById("debuffSlider");
       const debuffLabel = document.getElementById("debuffLabel");
-      debuffLabel.textContent = "戰場減益：" + (debuffSlider.value === "0" ? "0%" : "-" + debuffSlider.value + "%");
+      debuffLabel.textContent =
+        "戰場減益：" +
+        (debuffSlider.value === "0" ? "0%" : "-" + debuffSlider.value + "%");
     }
 
-    // ========================
-    // 第二部分：外部乘數與軍階
-    // ========================
-
-    // 軍階小階 1–120 → 百分比
+    // ========= 第二部分：外部乘數 =========
     function getRankMultiplier(step) {
       const s = clamp(step, 1, 120);
-      const smallBonus = s * 0.0025; // 每小階 +0.25%
+      const smallBonus = s * 0.0025;
       const bigSteps = Math.floor((s - 1) / 4);
-      const bigBonus = bigSteps * 0.005; // 每完成一大階 +0.5%
-      const total = smallBonus + bigBonus;
-      return 1 + total;
+      const bigBonus = bigSteps * 0.005;
+      return 1 + smallBonus + bigBonus;
     }
-
     function getPillMultiplier() {
       const idx = parseInt(document.getElementById("pillSlider").value, 10);
       if (idx === 0) return 0.4;
       if (idx === 1) return 1.0;
       return 1.6;
     }
-
     function getBuffDebuffMultiplier() {
       const buff = parseFloat(document.getElementById("buffSlider").value) || 0;
       const debuff = parseFloat(document.getElementById("debuffSlider").value) || 0;
-      const mBuff = 1 + buff / 100;
-      const mDebuff = 1 - debuff / 100;
-      return mBuff * mDebuff;
+      return (1 + buff / 100) * (1 - debuff / 100);
     }
-
     function getAmmoMultiplier() {
       const els = document.querySelectorAll('input[name="ammoType"]');
       let v = 1.4;
@@ -613,191 +574,226 @@
       return v;
     }
 
-    // ========================
-    // 傷害公式：期望單次傷害 / 週期 / DPD
-    // ========================
-
-    // 期望單次傷害
-    // 先 miss 再 crit：P = 命中率，C = 暴擊率，Dc = 暴擊倍率
-    // Miss: 1-P，傷害 0.5A；Hit&非暴: P(1-C)A；Hit&暴: PC·A·Dc
+    // ========= 傷害公式 =========
     function computeExpectedDamage(baseAttack, precisionRate, critChanceRate, critDamageMult) {
       const P = clamp(precisionRate, 0, 1);
       const C = clamp(critChanceRate, 0, 1);
       const A = baseAttack;
-      const dmg = A * (0.5 * (1 - P) + P * (1 - C) + P * C * critDamageMult);
-      return dmg;
+      return A * (0.5 * (1 - P) + P * (1 - C) + P * C * critDamageMult);
     }
-
-    // 這裡把「每次攻擊消耗的體力」當作一個常數，之後你可以在 UI 加一個輸入欄讓用戶改
     const HEALTH_PER_HIT = 10;
-
     function computeCycleAndDPD(expectedDamage, dailyHealth) {
-      if (HEALTH_PER_HIT <= 0 || dailyHealth <= 0) {
-        return { cycle: 0, dpd: 0 };
-      }
-      // 近似：一天可攻擊次數 = 每天可用體力 / 每次消耗體力
+      if (HEALTH_PER_HIT <= 0 || dailyHealth <= 0) return { cycle: 0, dpd: 0 };
       const hitsPerDay = dailyHealth / HEALTH_PER_HIT;
       const dpd = hitsPerDay * expectedDamage;
-      // 單週期總傷害：這裡先等同於「一天把體力用完的總傷害」
       const cycle = hitsPerDay * expectedDamage;
       return { cycle, dpd };
     }
 
-    // ========================
-    // 戰鬥技能等級 → 數值（不含裝備）
-    // ========================
-
-    const STAT_NAMES = ["Attack", "Precision", "CritChance", "CritDamage", "Armor", "Dodge", "Life"];
-
+    // ========= 戰鬥技能等級 → 數值 =========
     function levelToCombatStats(statLevels) {
       const La = statLevels.Attack || 0;
       const Lp = statLevels.Precision || 0;
       const Lcc = statLevels.CritChance || 0;
       const Lcd = statLevels.CritDamage || 0;
 
-      // Attack skill：基礎 100，每等 +20
       const A_skill = 100 + 20 * La;
-
-      // Precision：基礎 50%，每等 +5%，但實際命中率最多當作 100%
       const P_raw = 0.5 + 0.05 * Lp;
       const P_used = Math.min(P_raw, 1.0);
-
-      // Crit Chance：基礎 10%，每等 +5%，上限 100%
       const C = clamp(0.1 + 0.05 * Lcc, 0, 1.0);
-
-      // Crit Damage：基礎 100% → 倍率 1.0，每等 +20%
       const Dc = 1.0 + 0.2 * Lcd;
 
       return { A_skill, P_used, C, Dc };
     }
 
-    // ========================
-    // 三流派加點邏輯
-    // ========================
+    // ========= 暴力搜尋：只針對四個核心輸出技能 =========
+    // 回傳所有合法組合與其傷害表現，方便之後三種流派各自挑選
+    function searchAllCombos(availablePoints, externalStats) {
+      const dailyHealth = externalStats.dailyHealth;
+      const extAttackMul = externalStats.extAttackMul;
+      const extraCritChance = externalStats.extraCritChance;
+      const extraCritDamage = externalStats.extraCritDamage;
+      const extraPrecision = externalStats.extraPrecision;
 
-    // 這裡的 availablePoints 是「可用戰鬥技能點總數」，
-    // 我們用一個簡單的啟發式：忽略細緻的等級成本差異，以「點數 ≈ 等級」粗略分配。
-    // 未來若要精確，可改成在 0~10 等範圍內暴力搜尋最佳組合。
+      const combos = [];
 
-    function allocatePoints(mode, availablePoints) {
-      let weights;
-      if (mode === "conservative") {
-        // 穩健流：重視命中 / 生存（Precision, Life, Armor），稍微壓低爆擊成分
-        weights = {
-          Attack: 1.0,
-          Precision: 1.6,
-          CritChance: 0.7,
-          CritDamage: 0.7,
-          Armor: 1.2,
-          Dodge: 1.0,
-          Life: 1.4
-        };
-      } else if (mode === "burst") {
-        // 爆發流：重 Attack / CritDamage / CritChance
-        weights = {
-          Attack: 1.8,
-          Precision: 0.9,
-          CritChance: 1.4,
-          CritDamage: 1.7,
-          Armor: 0.5,
-          Dodge: 0.6,
-          Life: 0.8
-        };
-      } else {
-        // 平衡流：均衡各向，稍微偏 Attack / Precision / Life
-        weights = {
-          Attack: 1.4,
-          Precision: 1.3,
-          CritChance: 1.1,
-          CritDamage: 1.1,
-          Armor: 0.9,
-          Dodge: 0.9,
-          Life: 1.2
-        };
-      }
+      for (let La = 0; La <= 10; La++) {
+        for (let Lp = 0; Lp <= 10; Lp++) {
+          for (let Lcc = 0; Lcc <= 10; Lcc++) {
+            for (let Lcd = 0; Lcd <= 10; Lcd++) {
+              const cost =
+                levelToCost(La) +
+                levelToCost(Lp) +
+                levelToCost(Lcc) +
+                levelToCost(Lcd);
+              if (cost > availablePoints) continue;
 
-      const totalWeight = STAT_NAMES.reduce((s, name) => s + weights[name], 0);
-      const result = {};
-      STAT_NAMES.forEach(name => {
-        const alloc = (availablePoints * weights[name]) / totalWeight;
-        result[name] = clamp(Math.floor(alloc), 0, 10);
-      });
+              const stats = levelToCombatStats({
+                Attack: La,
+                Precision: Lp,
+                CritChance: Lcc,
+                CritDamage: Lcd
+              });
 
-      // 以優先順序把剩餘點數補到上限 10
-      let used = STAT_NAMES.reduce((s, name) => s + result[name], 0);
-      let remaining = availablePoints - used;
-      const order =
-        mode === "burst"
-          ? ["Attack", "CritDamage", "CritChance", "Precision", "Life", "Armor", "Dodge"]
-          : mode === "conservative"
-          ? ["Precision", "Life", "Armor", "Attack", "Dodge", "CritChance", "CritDamage"]
-          : ["Attack", "Precision", "Life", "CritDamage", "CritChance", "Armor", "Dodge"];
+              let { A_skill, P_used, C, Dc } = stats;
 
-      let idx = 0;
-      while (remaining > 0 && idx < order.length) {
-        const key = order[idx];
-        if (result[key] < 10) {
-          result[key] += 1;
-          remaining -= 1;
-        } else {
-          idx += 1;
+              // 疊加裝備加成
+              A_skill += externalStats.weaponDamage;
+              P_used = clamp(P_used + extraPrecision, 0, 1);
+              C = clamp(C + extraCritChance, 0, 1);
+              Dc = Dc + extraCritDamage;
+
+              const baseAttack = A_skill * extAttackMul;
+              const expected = computeExpectedDamage(
+                baseAttack,
+                P_used,
+                C,
+                Dc
+              );
+              const { cycle, dpd } = computeCycleAndDPD(expected, dailyHealth);
+
+              combos.push({
+                levels: { Attack: La, Precision: Lp, CritChance: Lcc, CritDamage: Lcd },
+                cost,
+                expected,
+                cycle,
+                dpd,
+                hitRate: P_used,
+                critChance: C,
+                critMult: Dc
+              });
+            }
+          }
         }
       }
-
-      return result;
+      return combos;
     }
 
-    // ========================
-    // 主計算流程（點擊「開始計算」觸發）
-    // ========================
+    // ========= 三種流派從搜尋結果中挑選 =========
+    function pickConservative(combos) {
+      // 先篩選命中率 >= 80% 的組合，以 DPD 最大為主
+      const good = combos.filter(c => c.hitRate >= 0.8);
+      const target = (good.length ? good : combos).reduce((best, c) =>
+        !best || c.dpd > best.dpd ? c : best,
+        null
+      );
+      return target;
+    }
+    function pickBalanced(combos) {
+      return combos.reduce((best, c) =>
+        !best || c.dpd > best.dpd ? c : best,
+        null
+      );
+    }
+    function pickBurst(combos) {
+      // 先看單次期望傷害，再用 DPD 當 tie-breaker
+      return combos.reduce((best, c) => {
+        if (!best) return c;
+        if (c.expected > best.expected + 1e-6) return c;
+        if (Math.abs(c.expected - best.expected) < 1e-6 && c.dpd > best.dpd) return c;
+        return best;
+      }, null);
+    }
 
+    // ========= 把剩餘戰鬥點 roughly 分給 Armor / Dodge / Life =========
+    function addDefensiveAllocation(coreCost, availablePoints) {
+      const remaining = Math.max(availablePoints - coreCost, 0);
+      const each = Math.floor(remaining / 3);
+      return {
+        Armor: clamp(each, 0, 10),
+        Dodge: clamp(each, 0, 10),
+        Life: clamp(each, 0, 10)
+      };
+    }
+
+    // ========= 主計算 =========
     function runCalculation() {
       const warningEl = document.getElementById("resultWarning");
       warningEl.style.display = "none";
       warningEl.textContent = "";
 
-      const availablePoints = parseInt(document.getElementById("availablePointsDisplay").value || "0", 10);
+      const availablePoints = parseInt(
+        document.getElementById("availablePointsDisplay").value || "0",
+        10
+      );
       if (isNaN(availablePoints) || availablePoints < 0) {
-        warningEl.textContent = "可用戰鬥技能點無效，請確認等級與技能等級設定。";
+        warningEl.textContent =
+          "可用戰鬥技能點無效，請確認等級與技能等級設定。";
         warningEl.style.display = "block";
         return;
       }
 
-      const useAdvanced = document.querySelector('input[name="useAdvanced"]:checked').value;
-      const dailyHealth = parseFloat(document.getElementById("dailyHealthDisplay").value) || 0;
+      const dailyHealth =
+        parseFloat(document.getElementById("dailyHealthDisplay").value) || 0;
 
-      // 外部乘數（只在進階模式時使用）
-      let externalMultiplier = 1.0;
+      const useAdvanced =
+        document.querySelector('input[name="useAdvanced"]:checked').value;
+
       let weaponDamage = 0;
       let extraCritChance = 0;
       let extraCritDamage = 0;
       let extraPrecision = 0;
+      let extMul = 1.0;
 
       if (useAdvanced === "yes") {
         weaponDamage = toNumber("weaponDamage");
         extraCritChance = toNumber("weaponCritChance") / 100;
         extraCritDamage = toNumber("helmetCritDamage") / 100;
         extraPrecision = toNumber("glovesPrecision") / 100;
-
         const ammoM = getAmmoMultiplier();
         const pillM = getPillMultiplier();
         const buffDebuffM = getBuffDebuffMultiplier();
         const rankStep = toNumber("rankStep");
         const rankM = getRankMultiplier(rankStep);
-
-        externalMultiplier = ammoM * pillM * buffDebuffM * rankM;
+        extMul = ammoM * pillM * buffDebuffM * rankM;
       }
 
-      // 根據是否進階模式決定流派列表
-      const flows = useAdvanced === "yes"
-        ? [
-            { key: "conservative", label: "穩健流", desc: "偏重命中與生存，減少傷害波動。" },
-            { key: "balanced", label: "平衡流", desc: "兼顧命中與暴擊，追求穩定的 DPD。" },
-            { key: "burst", label: "爆發流", desc: "偏重攻擊與暴擊倍率，追求高爆發與高 DPD。" }
-          ]
-        : [
-            { key: "balanced", label: "平衡流", desc: "在可用技能點下給出一組較均衡的戰鬥加點。" }
-          ];
+      // 聚合所有固定外部資訊，傳入搜尋函式
+      const externalStats = {
+        dailyHealth,
+        extAttackMul: extMul,
+        weaponDamage,
+        extraCritChance,
+        extraCritDamage,
+        extraPrecision
+      };
+
+      // 暴力搜尋所有合法組合
+      const combos = searchAllCombos(availablePoints, externalStats);
+      if (!combos.length) {
+        warningEl.textContent =
+          "在目前的可用戰鬥技能點下找不到合法組合，請檢查設定。";
+        warningEl.style.display = "block";
+        return;
+      }
+
+      // 依三種流派挑選最佳組合
+      const flows =
+        useAdvanced === "yes"
+          ? [
+              {
+                key: "conservative",
+                label: "穩健流",
+                desc: "偏重命中與生存，在命中率較高的前提下追求 DPD。"
+              },
+              {
+                key: "balanced",
+                label: "平衡流",
+                desc: "純以 DPD 最大化為主，兼顧命中與暴擊。"
+              },
+              {
+                key: "burst",
+                label: "爆發流",
+                desc: "以單發期望傷害為優先，兼顧 DPD 的爆擊取向。"
+              }
+            ]
+          : [
+              {
+                key: "balanced",
+                label: "平衡流",
+                desc: "在目前設定下給出 DPD 最大的一組戰鬥加點。"
+              }
+            ];
 
       const allocationTbody = document.querySelector("#allocationTable tbody");
       const damageTbody = document.querySelector("#damageTable tbody");
@@ -808,78 +804,70 @@
       let bestFlowLabel = "";
 
       flows.forEach(flow => {
-        // 依流派加點
-        const alloc = allocatePoints(flow.key, Math.max(availablePoints, 0));
+        let chosen;
+        if (flow.key === "conservative") chosen = pickConservative(combos);
+        else if (flow.key === "burst") chosen = pickBurst(combos);
+        else chosen = pickBalanced(combos);
 
-        // 將等級轉成戰鬥數值
-        let { A_skill, P_used, C, Dc } = levelToCombatStats(alloc);
+        if (!chosen) return;
 
-        // 進階裝備影響：額外加成在這裡疊加
-        if (useAdvanced === "yes") {
-          A_skill += weaponDamage;
-          C = clamp(C + extraCritChance, 0, 1);
-          Dc = Dc + extraCritDamage;
-          P_used = clamp(P_used + extraPrecision, 0, 1);
-        }
+        // 把剩餘戰鬥點 roughly 分給 Armor/Dodge/Life
+        const defAlloc = addDefensiveAllocation(chosen.cost, availablePoints);
 
-        // 實際攻擊力 = 技能攻擊 × 各種外部乘數
-        const baseAttack = A_skill * externalMultiplier;
+        const fullAlloc = {
+          Attack: chosen.levels.Attack,
+          Precision: chosen.levels.Precision,
+          CritChance: chosen.levels.CritChance,
+          CritDamage: chosen.levels.CritDamage,
+          Armor: defAlloc.Armor,
+          Dodge: defAlloc.Dodge,
+          Life: defAlloc.Life
+        };
 
-        // 單次期望傷害
-        const expected = computeExpectedDamage(baseAttack, P_used, C, Dc);
-
-        // 單週期與 DPD
-        const cycleD = computeCycleAndDPD(expected, dailyHealth);
-
-        if (cycleD.dpd > bestDpd) {
-          bestDpd = cycleD.dpd;
+        if (chosen.dpd > bestDpd) {
+          bestDpd = chosen.dpd;
           bestFlowLabel = flow.label;
         }
 
-        // ===== 輸出：加點建議 =====
         const trAlloc = document.createElement("tr");
         trAlloc.innerHTML = `
           <td><div class="flow-name">${flow.label}</div></td>
           <td><div class="flow-desc">${flow.desc}</div></td>
-          <td>${alloc.Attack}</td>
-          <td>${alloc.Precision}</td>
-          <td>${alloc.CritChance}</td>
-          <td>${alloc.CritDamage}</td>
-          <td>${alloc.Armor}</td>
-          <td>${alloc.Dodge}</td>
-          <td>${alloc.Life}</td>
+          <td>${fullAlloc.Attack}</td>
+          <td>${fullAlloc.Precision}</td>
+          <td>${fullAlloc.CritChance}</td>
+          <td>${fullAlloc.CritDamage}</td>
+          <td>${fullAlloc.Armor}</td>
+          <td>${fullAlloc.Dodge}</td>
+          <td>${fullAlloc.Life}</td>
         `;
         allocationTbody.appendChild(trAlloc);
 
-        // ===== 輸出：傷害表 =====
         const trDmg = document.createElement("tr");
         trDmg.innerHTML = `
           <td>${flow.label}</td>
-          <td>${fmt2(expected)}</td>
-          <td>${fmt2(cycleD.cycle)}</td>
-          <td>${fmt2(cycleD.dpd)}</td>
+          <td>${fmt2(chosen.expected)}</td>
+          <td>${fmt2(chosen.cycle)}</td>
+          <td>${fmt2(chosen.dpd)}</td>
         `;
         damageTbody.appendChild(trDmg);
       });
 
       const topDpdText = document.getElementById("topDpdText");
-      if (bestDpd >= 0) {
-        topDpdText.textContent = `目前在你的設定下，DPD 最高的是「${bestFlowLabel}」，約為 ${fmt2(bestDpd)} 點傷害／日。`;
-      } else {
-        topDpdText.textContent = "";
-      }
+      topDpdText.textContent =
+        bestDpd >= 0
+          ? `目前在你的設定下，DPD 最高的是「${bestFlowLabel}」，約為 ${fmt2(
+              bestDpd
+            )} 點傷害／日。`
+          : "";
     }
 
-    // ========================
-    // 事件綁定：頁面載入後
-    // ========================
-
+    // ========= 綁定事件 =========
     document.addEventListener("DOMContentLoaded", () => {
       updatePointsAndDaily();
       updateAdvancedVisibility();
       updateSlidersLabel();
 
-      // 第一部分輸入變動時，重新計算技能點與體力
       document.getElementById("levelInput").addEventListener("input", updatePointsAndDaily);
       document.getElementById("hungerLevel").addEventListener("input", updatePointsAndDaily);
       document.getElementById("ecoLevel1").addEventListener("input", updatePointsAndDaily);
@@ -889,19 +877,14 @@
         el.addEventListener("change", updatePointsAndDaily);
       });
 
-      // 是否使用進階裝備
       document.querySelectorAll('input[name="useAdvanced"]').forEach(el => {
-        el.addEventListener("change", () => {
-          updateAdvancedVisibility();
-        });
+        el.addEventListener("change", updateAdvancedVisibility);
       });
 
-      // Pill / Buff / Debuff 滑桿
       document.getElementById("pillSlider").addEventListener("input", updateSlidersLabel);
       document.getElementById("buffSlider").addEventListener("input", updateSlidersLabel);
       document.getElementById("debuffSlider").addEventListener("input", updateSlidersLabel);
 
-      // 計算按鈕
       document.getElementById("calcButton").addEventListener("click", runCalculation);
     });
   </script>
