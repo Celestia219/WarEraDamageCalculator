@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>Warera 戰鬥技能加點與傷害計算器</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Warera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
       --blue-light: #e6f3ff;
@@ -16,28 +16,32 @@
       --muted: #666;
       --bg: #f7f9fb;
     }
+
     * {
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
-        "Noto Sans TC", system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
     }
+
     body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--text-main);
     }
+
     .container {
       max-width: 1100px;
       margin: 0 auto;
       padding: 16px;
     }
+
     h1 {
       font-size: 24px;
       margin-bottom: 8px;
       color: var(--blue-main);
       text-align: center;
     }
+
     p.subtitle {
       text-align: center;
       margin-top: 0;
@@ -45,12 +49,14 @@
       color: var(--muted);
       font-size: 14px;
     }
+
     .card {
       border-radius: 8px;
       border: 1px solid var(--border-color);
       margin-bottom: 16px;
       overflow: hidden;
     }
+
     .card-header {
       padding: 10px 14px;
       font-weight: 600;
@@ -61,33 +67,41 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .card-body {
       padding: 12px 14px 16px 14px;
     }
+
     .section-bg-basic {
       background: var(--blue-light);
     }
+
     .section-bg-advanced {
       background: var(--green-light);
     }
+
     .section-bg-result {
       background: var(--purple-light);
     }
+
     .field-row {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       margin-bottom: 8px;
     }
+
     .field {
       flex: 1;
       min-width: 160px;
     }
+
     .field label {
       display: block;
       font-size: 13px;
       margin-bottom: 2px;
     }
+
     .field input[type="number"],
     .field input[type="text"],
     .field select {
@@ -97,36 +111,44 @@
       border: 1px solid var(--border-color);
       font-size: 13px;
     }
+
     .field-inline {
       display: flex;
       align-items: center;
       gap: 4px;
     }
+
     .field-inline span.suffix {
       font-size: 13px;
       color: var(--muted);
     }
+
     .hint {
       font-size: 12px;
       color: var(--muted);
       margin-top: 2px;
     }
+
     .warning {
       font-size: 12px;
       color: var(--danger);
       margin-top: 4px;
     }
+
     .radio-group,
     .slider-group {
       margin-bottom: 8px;
     }
+
     .radio-group label {
       margin-right: 12px;
       font-size: 13px;
     }
+
     input[type="range"] {
       width: 100%;
     }
+
     .btn {
       display: inline-block;
       padding: 8px 16px;
@@ -136,14 +158,17 @@
       font-size: 14px;
       font-weight: 500;
     }
+
     .btn-primary {
       background: var(--blue-main);
       color: #fff;
     }
+
     .btn-primary:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
+
     .btn-toggle {
       font-size: 13px;
       background: #fff;
@@ -152,11 +177,13 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     .btn-toggle.active {
       background: var(--blue-main);
       color: #fff;
       border-color: var(--blue-main);
     }
+
     .badge {
       display: inline-block;
       padding: 2px 6px;
@@ -167,40 +194,55 @@
       color: var(--muted);
       margin-left: 8px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid var(--border-color);
       padding: 6px 8px;
       text-align: center;
       white-space: nowrap;
     }
+
     th {
-      background: rgba(255,255,255,0.7);
+      background: rgba(255, 255, 255, 0.7);
     }
+
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
     }
+
     .dpd-highlight {
       font-size: 18px;
       font-weight: 600;
       color: var(--blue-main);
     }
+
     .flow-name {
       font-weight: 600;
       font-size: 13px;
     }
+
     .flow-desc {
       font-size: 11px;
       color: var(--muted);
     }
+
+    /* 自動計算且不能修改的欄位，灰底顯示 */
+    .readonly-display {
+      background-color: #f1f1f1;
+      color: #555;
+    }
+
     @media (max-width: 768px) {
       .field {
-        min-width: 100%;
+        min-width: 100px;
       }
       .card-header {
         font-size: 15px;
@@ -210,204 +252,226 @@
 </head>
 <body>
   <div class="container">
-    <h1>Warera 戰鬥技能加點與傷害計算器</h1>
-    <p class="subtitle">輸入等級與參數，獲得穩健流／平衡流／爆發流的加點建議與傷害預估。</p>
+    <h1>Warera</h1>
+    <p class="subtitle">戰鬥技能加點＆期望傷害試算工具（非官方，僅供參考）</p>
 
-<!-- 第一部分：基本資料與技能點（整個區塊長期顯示） -->
-<section id="section-basic">
-  <!-- 玩家等級與總技能點計算 -->
-  <div>
-    <label for="playerLevel">玩家等級：</label>
-    <!-- 輸入玩家等級，變動時觸發重新計算 -->
-    <input type="number" id="playerLevel" min="1" value="1" oninput="recalculatePoints()">
-  </div>
-
-  <div>
-    <!-- 顯示總技能點（等級 × 4，自動計算，灰色不可編輯） -->
-    <label for="totalSkillPoints">總技能點（等級 × 4）：</label>
-    <input type="number" id="totalSkillPoints" value="4" readonly style="background-color:#eee;">
-  </div>
-
-  <!-- 飽食與經濟技能：改成輸入「技能等級」 -->
-  <div>
-    <label for="satietyLevel">飽食技能等級：</label>
-    <!-- 使用者輸入等級，內部會轉成已用點數 -->
-    <input type="number" id="satietyLevel" min="0" value="0" oninput="recalculatePoints()">
-  </div>
-
-  <div>
-    <label for="econ1Level">創業（經濟技能 1）等級：</label>
-    <input type="number" id="econ1Level" min="0" value="0" oninput="recalculatePoints()">
-  </div>
-
-  <div>
-    <label for="econ2Level">打工（經濟技能 2）等級：</label>
-    <input type="number" id="econ2Level" min="0" value="0" oninput="recalculatePoints()">
-  </div>
-
-  <div>
-    <label for="econ3Level">生產力（經濟技能 3）等級：</label>
-    <input type="number" id="econ3Level" min="0" value="0" oninput="recalculatePoints()">
-  </div>
-
-  <!-- 這裡顯示後端由「技能等級」換算出的已使用點數與可用戰鬥點數 -->
-  <div>
-    <label for="usedSkillPoints">已使用技能點總和：</label>
-    <!-- 自動計算，灰色不可編輯 -->
-    <input type="number" id="usedSkillPoints" value="0" readonly style="background-color:#eee;">
-  </div>
-
-  <div>
-    <label for="availableBattleSkillPoints">可用戰鬥技能點：</label>
-    <!-- 自動計算（總技能點 - 已使用），灰色不可編輯 -->
-    <input type="number" id="availableBattleSkillPoints" value="0" readonly style="background-color:#eee;">
-  </div>
-
-  <!-- 如有超出總點數，在這裡顯示警告文字 -->
-  <p id="skillPointWarning" style="color:red; display:none;">
-    已使用技能點超過等級可獲得的總點數。
-  </p>
-
-  <!-- 飽食上限與每天可回復體力：照原本公式灰色顯示 -->
-  <div>
-    <label for="satietyMax">飽食上限：</label>
-    <!-- 自動計算或由飽食技能推算，如有需要可再補充公式 -->
-    <input type="number" id="satietyMax" value="0" readonly style="background-color:#eee;">
-  </div>
-
-  <div>
-    <label for="foodType">食品種類：</label>
-    <!-- 使用者選擇食品種類，改變單次回復量，並觸發每天可回復體力的計算 -->
-    <select id="foodType" onchange="recalculatePoints()">
-      <option value="10">麵包（+10 體力）</option>
-      <option value="20">牛肉（+20 體力）</option>
-      <option value="30">魚肉（+30 體力）</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="dailyStaminaRecovery">每天可回復體力總量：</label>
-    <!-- 公式：飽食上限 × 食品單次回復量 × 2.4，自動計算，灰色不可編輯 -->
-    <input type="number" id="dailyStaminaRecovery" value="0" readonly style="background-color:#eee;">
-  </div>
-
-  <!-- 是否進行最佳化：此處會控制第二部分顯示與否 -->
-  <div>
-    <p>是否使用裝備與加成進行最佳化？</p>
-    <!-- 預設「否」，但第一、三部分長期顯示；按「是」才顯示第二部分 -->
-    <label>
-      <input type="radio" name="useOptimization" value="no" checked onclick="toggleAdvanced(false)">
-      否，只顯示平衡流建議
-    </label>
-    <label>
-      <input type="radio" name="useOptimization" value="yes" onclick="toggleAdvanced(true)">
-      是，輸入裝備與加成後最佳化
-    </label>
-  </div>
-</section>
-
-
-    <!-- 第二部分：裝備與加成（進階） -->
-    <div class="card section-bg-advanced" id="advancedSection" style="display:none;">
+    <!-- ================= 第一部分：角色等級與基本技能 ================= -->
+    <!-- 此卡片負責輸入等級、飢餓（飽食）相關技能、三個經濟技能（創業／打工／生產力），並自動計算可用戰鬥技能點與每天可回復體力 -->
+    <div class="card section-bg-basic">
       <div class="card-header">
-        <span>第二部分：裝備與戰場加成（進階選項）</span>
-        <span class="badge">進階</span>
+        <span>第一部分：基本設定（等級與技能）</span>
       </div>
       <div class="card-body">
-        <!-- 裝備數據 -->
         <div class="field-row">
           <div class="field">
-            <label>Weapon - Damage</label>
-            <input type="number" id="weaponDamage" min="0" value="0" />
-            <div class="hint">若不填寫，預設為 0。</div>
+            <label>角色等級 Level</label>
+            <input type="number" id="levelInput" min="0" value="100">
+            <div class="hint">等級越高，可分配的戰鬥技能點越多。</div>
           </div>
+
           <div class="field">
-            <label>Weapon - Crit Chance</label>
-            <div class="field-inline">
-              <input type="number" id="weaponCritChance" min="0" max="100" value="0" />
-              <span class="suffix">%</span>
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Helmet - Crit Damage</label>
-            <div class="field-inline">
-              <input type="number" id="helmetCritDamage" min="0" value="0" />
-              <span class="suffix">%</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Upper armour - Armour</label>
-            <div class="field-inline">
-              <input type="number" id="upperArmour" min="0" value="0" />
-              <span class="suffix">%</span>
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Lower armour - Armour</label>
-            <div class="field-inline">
-              <input type="number" id="lowerArmour" min="0" value="0" />
-              <span class="suffix">%</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Boots - Evasion（Dodge）</label>
-            <div class="field-inline">
-              <input type="number" id="bootsEvasion" min="0" max="100" value="0" />
-              <span class="suffix">%</span>
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Gloves - Precision</label>
-            <div class="field-inline">
-              <input type="number" id="glovesPrecision" min="0" max="100" value="0" />
-              <span class="suffix">%</span>
-            </div>
+            <label>飢餓技能等級（提高飽食上限）</label>
+            <input type="number" id="hungerSkillUsed" min="0" value="0">
+            <div class="hint">輸入的是「技能等級」，不是已使用點數。</div>
           </div>
         </div>
 
-        <hr />
-
-        <!-- 彈藥 / Pill / 加成減益 -->
         <div class="field-row">
           <div class="field">
-            <label>子彈種類</label>
+            <label>創業技能等級</label>
+            <input type="number" id="ecoSkill1Used" min="0" value="0">
+            <div class="hint">原「經濟技能 1」，改為「創業」。輸入技能等級。</div>
+          </div>
+          <div class="field">
+            <label>打工技能等級</label>
+            <input type="number" id="ecoSkill2Used" min="0" value="0">
+            <div class="hint">原「經濟技能 2」，改為「打工」。輸入技能等級。</div>
+          </div>
+          <div class="field">
+            <label>生產力技能等級</label>
+            <input type="number" id="ecoSkill3Used" min="0" value="0">
+            <div class="hint">原「經濟技能 3」，改為「生產力」。輸入技能等級。</div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>已分配之技能等級總和</label>
+            <!-- 只顯示由上面四個技能等級加總的結果，不給改 -->
+            <input type="text" id="usedPointsDisplay" class="readonly-display" readonly>
+            <div class="hint">飢餓＋創業＋打工＋生產力的等級總和。</div>
+          </div>
+          <div class="field">
+            <label>可用戰鬥技能點（攻擊、命中、爆率、爆傷、防禦、閃避、生命）</label>
+            <!-- 由等級推算出的可用戰鬥技能點，灰掉顯示，不允許使用者直接修改 -->
+            <input type="text" id="availablePointsDisplay" class="readonly-display" readonly>
+            <div id="pointsWarning" class="warning" style="display:none;"></div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="field-row">
+          <div class="field">
+            <label>飽食上限（自動計算）</label>
+            <!-- 只顯示計算結果，不給改；原本是 input，現在改成 readonly＋灰色樣式 -->
+            <input type="number" id="hungerMaxInput" class="readonly-display" readonly value="20">
+            <div class="hint">依飢餓技能等級自動推算。</div>
+          </div>
+          <div class="field">
+            <label>主食品質（食物類型）</label>
             <div class="radio-group">
-              <label><input type="radio" name="ammoType" value="1.4" checked /> 重彈（+40% 傷害）</label>
-              <label><input type="radio" name="ammoType" value="1.2" /> 普通彈（+20%）</label>
-              <label><input type="radio" name="ammoType" value="1.1" /> 輕彈（+10%）</label>
+              <label><input type="radio" name="foodType" value="10" checked> 低級主食（10）</label>
+              <label><input type="radio" name="foodType" value="20"> 中級主食（20）</label>
+              <label><input type="radio" name="foodType" value="30"> 高級主食（30）</label>
             </div>
+            <div class="hint">代表每一點飽食可回復多少體力。</div>
           </div>
         </div>
 
         <div class="field-row">
           <div class="field">
-            <label>Pill 狀態</label>
-            <div class="slider-group">
-              <input type="range" id="pillSlider" min="0" max="2" step="1" value="1" />
-              <div class="hint">三個刻度：-60%（0.4 倍）、0%（1.0 倍）、+60%（1.6 倍）</div>
-              <div id="pillLabel" class="hint"></div>
+            <label>每天可回復的體力（自動計算）</label>
+            <!-- 灰掉不讓修改，只顯示計算結果 -->
+            <input type="text" id="dailyHealthDisplay" class="readonly-display" readonly>
+            <div class="hint">依飽食上限與食物類型自動推算。</div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- 是否使用進階裝備與藥水等資訊來最佳化分配 -->
+        <div class="field-row">
+          <div class="field">
+            <label>是否進行最佳化（使用裝備／藥水等詳細資訊）</label>
+            <div class="radio-group">
+              <label><input type="radio" name="useAdvanced" value="no" checked> 否：只用基本技能計算</label>
+              <label><input type="radio" name="useAdvanced" value="yes"> 是：顯示第二部分，使用裝備與藥水資訊進行最佳化</label>
             </div>
+            <div class="hint">第一部分與第三部分會一直顯示，選「是」時會額外展開第二部分。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 第二部分：進階裝備與藥水（預設隱藏） ================= -->
+    <!-- 只有在第一部分選「是否進行最佳化」為「是」時，才會顯示此區域 -->
+    <div class="card section-bg-advanced" id="advancedSection" style="display:none;">
+      <div class="card-header">
+        <span>第二部分：裝備與進階設定（選填）</span>
+        <span class="badge">僅在「是否進行最佳化」選擇「是」時使用</span>
+      </div>
+      <div class="card-body">
+
+        <!-- 裝備輸入：武器、頭盔、上衣、防具、鞋子等 -->
+        <div class="field-row">
+          <div class="field">
+            <label>武器傷害 Weapon - Damage</label>
+            <input type="number" id="weaponDamage" min="0" value="0">
+            <div class="hint">武器面板攻擊力。</div>
+          </div>
+          <div class="field">
+            <label>武器爆率 Weapon - Crit Chance</label>
+            <div class="field-inline">
+              <input type="number" id="weaponCritChance" min="0" max="100" value="0">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">武器提供的額外爆擊率。</div>
           </div>
         </div>
 
         <div class="field-row">
           <div class="field">
-            <label>戰場加成（0% ~ +80%）</label>
+            <label>頭盔爆傷 Helmet - Crit Damage</label>
+            <div class="field-inline">
+              <input type="number" id="helmetCritDamage" min="0" value="0">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">頭盔提供的爆擊傷害加成。</div>
+          </div>
+          <div class="field">
+            <label>上衣防禦 Upper Armour - Armour</label>
+            <div class="field-inline">
+              <input type="number" id="upperArmour" min="0" value="0">
+              <span class="suffix">點</span>
+            </div>
+            <div class="hint">上半身裝備提供的防禦值。</div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>下衣防禦 Lower Armour - Armour</label>
+            <div class="field-inline">
+              <input type="number" id="lowerArmour" min="0" value="0">
+              <span class="suffix">點</span>
+            </div>
+            <div class="hint">下半身裝備提供的防禦值。</div>
+          </div>
+          <div class="field">
+            <label>鞋子閃避 Boots - Evasion/Dodge</label>
+            <div class="field-inline">
+              <input type="number" id="bootsEvasion" min="0" max="100" value="0">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">鞋子提供的閃避率。</div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>手套命中 Gloves - Precision</label>
+            <div class="field-inline">
+              <input type="number" id="glovesPrecision" min="0" max="100" value="0">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">手套提供的命中率。</div>
+          </div>
+          <div class="field">
+            <label>項鍊生命 Necklace - Life</label>
+            <div class="field-inline">
+              <input type="number" id="necklaceLife" min="0" value="0">
+              <span class="suffix">點</span>
+            </div>
+            <div class="hint">項鍊提供的額外生命值。</div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- 彈藥、藥丸、BUFF／DEBUFF slider 設定 -->
+        <div class="field-row">
+          <div class="field">
+            <label>彈藥類型 Ammo Type</label>
+            <div class="radio-group">
+              <label><input type="radio" name="ammoType" value="1.4" checked> 40% 加成（1.4）</label>
+              <label><input type="radio" name="ammoType" value="1.2"> 20% 加成（1.2）</label>
+              <label><input type="radio" name="ammoType" value="1.1"> 10% 加成（1.1）</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>藥丸 Pill</label>
             <div class="slider-group">
-              <input type="range" id="buffSlider" min="0" max="80" step="5" value="0" />
+              <input type="range" id="pillSlider" min="0" max="2" step="1" value="1">
+              <div class="hint">左：-60%（0.4） 中：0%（1.0） 右：+60%（1.6）</div>
+            </div>
+            <div id="pillLabel" class="hint"></div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>BUFF 總和 Buff Total</label>
+            <div class="slider-group">
+              <input type="range" id="buffSlider" min="0" max="80" step="5" value="0">
               <div id="buffLabel" class="hint"></div>
             </div>
           </div>
           <div class="field">
-            <label>戰場減益（0% ~ -40%）</label>
+            <label>DEBUFF 總和 Debuff Total</label>
             <div class="slider-group">
-              <input type="range" id="debuffSlider" min="0" max="40" step="5" value="0" />
+              <input type="range" id="debuffSlider" min="0" max="40" step="5" value="0">
               <div id="debuffLabel" class="hint"></div>
             </div>
           </div>
@@ -415,63 +479,63 @@
 
         <div class="field-row">
           <div class="field">
-            <label>軍階小階編號（1–120）</label>
-            <input type="number" id="rankStep" min="1" max="120" value="1" />
-            <div class="hint">每小階 +0.25%，每完成 4 小階額外 +0.5%。</div>
+            <label>階級 Rank Step（1～120）</label>
+            <input type="number" id="rankStep" min="1" max="120" value="1">
+            <div class="hint">每一階提供一定比例的整體加成。</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 第三部分：結果 -->
-    <div class="card section-bg-result" id="resultSection" style="display:none;">
+    <!-- ================= 第三部分：計算結果與推薦 ================= -->
+    <!-- 這一區負責顯示計算按鈕、三種加點流派的分配與 DPD 結果；預設顯示 -->
+    <div class="card section-bg-result" id="resultSection">
       <div class="card-header">
-        <span>第三部分：技能加點建議與傷害預估</span>
+        <span>第三部分：加點建議與結果</span>
       </div>
       <div class="card-body">
         <div style="margin-bottom: 10px;">
-          <button class="btn btn-primary" id="calcButton">開始計算</button>
+          <button class="btn btn-primary" id="calcButton">計算加點結果與傷害</button>
         </div>
-
         <div id="resultWarning" class="warning" style="display:none;"></div>
 
         <!-- 加點建議表 -->
-        <h3 style="font-size:16px;margin-top:10px;">技能加點建議</h3>
+        <h3 style="font-size:16px;margin-top:10px;">加點分配建議（依流派）</h3>
         <div class="table-wrapper">
           <table id="allocationTable">
             <thead>
               <tr>
                 <th>流派</th>
                 <th>說明</th>
-                <th>Attack</th>
-                <th>Precision</th>
-                <th>Crit Chance</th>
-                <th>Crit Damage</th>
-                <th>Armor</th>
-                <th>Dodge</th>
-                <th>Life</th>
+                <th>攻擊<br>Attack</th>
+                <th>命中<br>Precision</th>
+                <th>爆率<br>Crit Chance</th>
+                <th>爆傷<br>Crit Damage</th>
+                <th>防禦<br>Armor</th>
+                <th>閃避<br>Dodge</th>
+                <th>生命<br>Life</th>
               </tr>
             </thead>
             <tbody>
-              <!-- 動態填入 -->
+              <!-- 由 JS 動態產生 -->
             </tbody>
           </table>
         </div>
 
-        <!-- 傷害結果表 -->
-        <h3 style="font-size:16px;margin-top:16px;">傷害預估</h3>
+        <!-- 傷害與 DPD 表 -->
+        <h3 style="font-size:16px;margin-top:16px;">期望傷害與 DPD</h3>
         <div class="table-wrapper">
           <table id="damageTable">
             <thead>
               <tr>
                 <th>流派</th>
-                <th>單次期望傷害</th>
-                <th>單週期總傷害</th>
-                <th>DPD（24 小時）</th>
+                <th>期望單次傷害<br>Expected Damage</th>
+                <th>平均每循環擊中次數<br>Cycle Hits</th>
+                <th>DPD（每日傷害）</th>
               </tr>
             </thead>
             <tbody>
-              <!-- 動態填入 -->
+              <!-- 由 JS 動態產生 -->
             </tbody>
           </table>
         </div>
@@ -484,51 +548,77 @@
   </div>
 
   <script>
-    // ===== 工具函式 =====
+    // ======== 共用小工具函式 ========
     function clamp(v, min, max) {
       return Math.min(max, Math.max(min, v));
     }
+
     function toNumber(id) {
       const v = parseFloat(document.getElementById(id).value);
       return isNaN(v) ? 0 : v;
     }
+
     function fmt2(x) {
       return x.toFixed(2);
     }
 
-    // ===== 初始化顯示 =====
+    // ======== 第一部分：更新可用戰鬥技能點與每日體力 ========
     function updatePointsAndDaily() {
+      // 1. 角色等級 → 總技能點（目前假設：每級 4 點可分配）
       const level = toNumber("levelInput");
       const totalPoints = level * 4;
 
+      // 2. 四種非戰鬥技能的「技能等級」：飢餓＋創業＋打工＋生產力
       const hungerUsed = toNumber("hungerSkillUsed");
       const eco1 = toNumber("ecoSkill1Used");
       const eco2 = toNumber("ecoSkill2Used");
       const eco3 = toNumber("ecoSkill3Used");
 
+      // 3. 已使用點數（技能等級總和）
       const used = hungerUsed + eco1 + eco2 + eco3;
       const available = totalPoints - used;
 
+      // 4. 更新顯示（只讀欄位）
       document.getElementById("usedPointsDisplay").value = used;
       document.getElementById("availablePointsDisplay").value = available;
 
+      // 5. 超出分配警告
       const warn = document.getElementById("pointsWarning");
       if (available < 0) {
         warn.style.display = "block";
+        warn.textContent = "警告：已分配的技能等級總和超過此等級所能提供的點數。";
       } else {
         warn.style.display = "none";
+        warn.textContent = "";
       }
 
-      const hungerMax = toNumber("hungerMaxInput");
-      const foodTypeEls = document.querySelectorAll('input[name="foodType"]');
+      // 6. 根據飢餓技能等級推算「飽食上限」（你若有更精確公式可自行改這裡）
+      const baseHungerMax = 20; // 預設基礎飽食上限
+      const hungerMax = baseHungerMax + hungerUsed * 1; // 每點飢餓技能 +1 上限（示意）
+      document.getElementById("hungerMaxInput").value = hungerMax;
+
+      // 7. 食物類型 → 每一點飽食能回多少體力
+      const foodTypeEls = document.querySelectorAll("input[name='foodType']");
       let foodValue = 10;
-      foodTypeEls.forEach(el => { if (el.checked) foodValue = parseFloat(el.value); });
-      const dailyHealth = hungerMax * foodValue * 2.4;
+      foodTypeEls.forEach(el => {
+        if (el.checked) {
+          foodValue = parseFloat(el.value);
+        }
+      });
+
+      // 8. 每天可回復體力：飽食上限 * 每點飽食回復量 / 2.4（原始程式寫法）
+      const dailyHealth = hungerMax * foodValue / 2.4;
       document.getElementById("dailyHealthDisplay").value = fmt2(dailyHealth);
     }
 
+    // ======== 控制第二部分顯示／隱藏（依「是否進行最佳化」） ========
     function updateAdvancedVisibility() {
-      const val = document.querySelector('input[name="useAdvanced"]:checked').value;
+      const els = document.querySelectorAll("input[name='useAdvanced']");
+      let val = "no";
+      els.forEach(el => {
+        if (el.checked) val = el.value;
+      });
+
       const adv = document.getElementById("advancedSection");
       if (val === "yes") {
         adv.style.display = "block";
@@ -537,36 +627,40 @@
       }
     }
 
+    // ======== 第二部分：Slider 顯示文字 ========
     function updateSlidersLabel() {
       const pillSlider = document.getElementById("pillSlider");
       const pillLabel = document.getElementById("pillLabel");
       const idx = parseInt(pillSlider.value, 10);
-      let text = "";
-      if (idx === 0) text = "當前 Pill：-60%（乘數 0.4）";
-      else if (idx === 1) text = "當前 Pill：0%（乘數 1.0）";
-      else text = "當前 Pill：+60%（乘數 1.6）";
+      let text;
+      if (idx === 0) {
+        text = "藥丸效果：-60% 傷害（倍率 0.4）";
+      } else if (idx === 1) {
+        text = "藥丸效果：0%（倍率 1.0）";
+      } else {
+        text = "藥丸效果：+60% 傷害（倍率 1.6）";
+      }
       pillLabel.textContent = text;
 
       const buffSlider = document.getElementById("buffSlider");
       const buffLabel = document.getElementById("buffLabel");
-      buffLabel.textContent = "戰場加成：" + buffSlider.value + "%";
+      buffLabel.textContent = "BUFF 總和：" + buffSlider.value + "%";
 
       const debuffSlider = document.getElementById("debuffSlider");
       const debuffLabel = document.getElementById("debuffLabel");
-      debuffLabel.textContent = "戰場減益：" + (debuffSlider.value === "0" ? "0%" : "-" + debuffSlider.value + "%");
+      const v = parseFloat(debuffSlider.value) || 0;
+      debuffLabel.textContent = "DEBUFF 總和：" + (v === 0 ? 0 : -v) + "%";
     }
 
-    function ensureResultVisible() {
-      document.getElementById("resultSection").style.display = "block";
-    }
+    // 第三部分一定顯示，所以這裡不用再特別控制 resultSection 的 display
 
-    // ===== 戰鬥計算相關 =====
+    // ======== 進階參數：各種倍率計算 ========
     function getRankMultiplier(step) {
-      // step: 1-120
+      // 階級加成：每階小加成 0.25%，每 4 階額外大加成 0.5%（示意）
       const s = clamp(step, 1, 120);
       const smallBonus = s * 0.0025; // 0.25% per step
       const bigSteps = Math.floor((s - 1) / 4);
-      const bigBonus = bigSteps * 0.005; // 0.5% per big rank
+      const bigBonus = bigSteps * 0.005; // 0.5% per big step
       const total = smallBonus + bigBonus;
       return 1 + total;
     }
@@ -587,47 +681,52 @@
     }
 
     function getAmmoMultiplier() {
-      const els = document.querySelectorAll('input[name="ammoType"]');
+      const els = document.querySelectorAll("input[name='ammoType']");
       let v = 1.4;
-      els.forEach(el => { if (el.checked) v = parseFloat(el.value); });
+      els.forEach(el => {
+        if (el.checked) v = parseFloat(el.value);
+      });
       return v;
     }
 
-    // 期望傷害
+    // ======== 戰鬥期望傷害計算 ========
     function computeExpectedDamage(baseAttack, precisionRate, critChanceRate, critDamageMult) {
-      // Miss -> 0.5 * A, no crit
+      // P: 命中機率, C: 爆擊機率, A: 攻擊力, Dc: 爆傷倍率
       const P = clamp(precisionRate, 0, 1);
       const C = clamp(critChanceRate, 0, 1);
       const A = baseAttack;
+      const Dc = critDamageMult;
 
-      const dmg = A * (0.5 * (1 - P) + P * (1 - C) + P * C * critDamageMult);
+      // 未命中：0 傷害
+      // 命中但不爆擊：A
+      // 命中且爆擊：A * Dc
+      const dmg = A * (P * (1 - C) + P * C * Dc);
       return dmg;
     }
 
-    // 簡化假設：每次攻擊消耗固定體力（讓使用者可以自行再改進）
     const HEALTH_PER_HIT = 10;
 
     function computeCycleAndDPD(expectedDamage, dailyHealth) {
-      if (HEALTH_PER_HIT <= 0) return { cycle: 0, dpd: 0 };
-      // 週期：從滿 Health + Hunger 消耗完體力
-      // 這裡簡化用 dailyHealth / HEALTH_PER_HIT 作為可攻擊次數 proxy
+      if (HEALTH_PER_HIT <= 0) {
+        return { cycle: 0, dpd: 0 };
+      }
+      // 這裡沿用原來邏輯：用每日體力推算可攻擊次數，再乘以期望傷害
       const hitsPerDay = dailyHealth / HEALTH_PER_HIT;
       const dpd = hitsPerDay * expectedDamage;
-      // 一個「週期」可以理解為把當前 dailyHealth 都用完
-      const cycle = hitsPerDay * expectedDamage;
+      const cycle = hitsPerDay;
       return { cycle, dpd };
     }
 
-    // ===== 三種流派的加點邏輯（簡化版） =====
-    // 所有戰鬥技能上限 10 等，成本 1+2+...+10=55 點；這裡我先假設每等成本 1 點，總可用點數直接分配（之後如要細化可改）
+    // ======== 自動加點：三種流派 ========
     const STAT_NAMES = ["Attack", "Precision", "CritChance", "CritDamage", "Armor", "Dodge", "Life"];
 
-    function allocatePoints(mode, availablePoints) {
-      // mode: "conservative" / "balanced" / "burst"
-      // 簡單按比例分配，並限制 0~10 等
+    function allocatePoints(mode, availablePointsRaw) {
+      // mode: "conservative"（穩健）、"balanced"（平衡）、"burst"（爆發）
+      let availablePoints = Math.max(availablePointsRaw, 0);
+
       let weights;
       if (mode === "conservative") {
-        // 穩健流：重 Precision / Life / Armor
+        // 穩健：命中、生命、防禦較重
         weights = {
           Attack: 1.0,
           Precision: 1.5,
@@ -638,7 +737,7 @@
           Life: 1.3
         };
       } else if (mode === "burst") {
-        // 爆發流：重 Attack / CritDamage / CritChance
+        // 爆發：攻擊、爆傷、爆率較重
         weights = {
           Attack: 1.6,
           Precision: 1.0,
@@ -649,7 +748,7 @@
           Life: 0.8
         };
       } else {
-        // 平衡流
+        // 平衡：兼顧各項
         weights = {
           Attack: 1.3,
           Precision: 1.2,
@@ -660,16 +759,19 @@
           Life: 1.0
         };
       }
-      const totalWeight = STAT_NAMES.reduce((s, name) => s + weights[name], 0);
+
+      const totalWeight = STAT_NAMES.reduce((s, name) => s + (weights[name] || 0), 0);
       const result = {};
       STAT_NAMES.forEach(name => {
-        const alloc = (availablePoints * weights[name]) / totalWeight;
-        // 將點數投成等級，最大 10
+        const alloc = availablePoints * (weights[name] || 0) / totalWeight;
+        // 每個技能最多 10 點為例（可自行修改）
         result[name] = clamp(Math.floor(alloc), 0, 10);
       });
-      // 簡單微調：如果還有剩餘點數，就依照 Attack > Precision > CritDamage > CritChance > Life > Armor > Dodge 的優先順序補到上限 10
-      let used = STAT_NAMES.reduce((s, name) => s + result[name], 0);
+
+      let used = STAT_NAMES.reduce((s, name) => s + (result[name] || 0), 0);
       let remaining = availablePoints - used;
+
+      // 剩餘點數依一定順序再分配
       const order = ["Attack", "Precision", "CritDamage", "CritChance", "Life", "Armor", "Dodge"];
       let idx = 0;
       while (remaining > 0 && idx < order.length) {
@@ -684,45 +786,65 @@
       return result;
     }
 
+    // ======== 將「技能點數」換成實際戰鬥屬性 ========
     function levelToCombatStats(stats) {
-      const La = stats.Attack;
-      const Lp = stats.Precision;
-      const Lcc = stats.CritChance;
-      const Lcd = stats.CritDamage;
-      // Attack skill
-      const A_skill = 100 + 20 * La;
-      // Precision
-      const P = clamp(0.5 + 0.05 * Lp, 0, 1.4); // 上限 140%，但超過 100% 當作 100% 處理可再調整
-      const P_used = Math.min(P, 1.0);
-      // Crit Chance
+      const La = stats.Attack;      // 攻擊技能點
+      const Lp = stats.Precision;   // 命中技能點
+      const Lcc = stats.CritChance; // 爆率技能點
+      const Lcd = stats.CritDamage; // 爆傷技能點
+
+      // 攻擊力：基礎 100，每點 +20（可視實際情況調整）
+      const Askill = 100 + 20 * La;
+
+      // 命中率：基礎 50%，每點 +5%，但最多 140% → 取 1.4，再限縮到 [0,1] 作為生效值
+      const P = clamp(0.5 + 0.05 * Lp, 0, 1.4);
+      const Pused = Math.min(P, 1.0);
+
+      // 爆率：基礎 10%，每點 +5%，上限 100%
       const C = clamp(0.1 + 0.05 * Lcc, 0, 1.0);
-      // Crit Damage（倍率）
+
+      // 爆傷倍率：基礎 1.0，每點 +0.2
       const Dc = 1.0 + 0.2 * Lcd;
-      return { A_skill, P_used, C, Dc };
+
+      return { Askill, Pused, C, Dc };
     }
 
-    // ===== 主計算流程 =====
+    // ======== 主邏輯：執行計算並更新表格 ========
     function runCalculation() {
-      ensureResultVisible();
       const warningEl = document.getElementById("resultWarning");
       warningEl.style.display = "none";
       warningEl.textContent = "";
 
-      const availablePoints = parseInt(document.getElementById("availablePointsDisplay").value || "0", 10);
+      let availablePoints = parseInt(document.getElementById("availablePointsDisplay").value, 10) || 0;
       if (isNaN(availablePoints) || availablePoints <= 0) {
-        warningEl.textContent = "可用戰鬥技能點為 0 或無效，請確認等級與已用技能點設定。";
+        warningEl.textContent = "目前可用戰鬥技能點為 0，請確認第一部分的設定。";
         warningEl.style.display = "block";
+        return;
       }
 
-      const useAdvanced = document.querySelector('input[name="useAdvanced"]:checked').value;
       const dailyHealth = parseFloat(document.getElementById("dailyHealthDisplay").value) || 0;
+      if (dailyHealth <= 0) {
+        warningEl.textContent = "每天可回復體力為 0，請確認飢餓技能與主食設定。";
+        warningEl.style.display = "block";
+        return;
+      }
 
-      // 乘數部分（進階才用）
+      // 是否使用進階設定（第二部分）
+      const useAdvancedEls = document.querySelectorAll("input[name='useAdvanced']");
+      let useAdvanced = "no";
+      useAdvancedEls.forEach(el => {
+        if (el.checked) useAdvanced = el.value;
+      });
+
+      // 若使用進階設定，就計算額外的倍率
       let externalMultiplier = 1.0;
       if (useAdvanced === "yes") {
-        const weaponDamage = toNumber("weaponDamage");
-        // 這裡簡化：Weapon Damage 視作加到 Attack skill 上的額外固定值
-        // Armor / Dodge / Life 對輸出不直接加成，暫不入乘數
+        const weaponDamage = toNumber("weaponDamage");          // 武器攻擊
+        const weaponCritChance = toNumber("weaponCritChance") / 100; // 武器爆率
+        const helmetCritDamage = toNumber("helmetCritDamage") / 100; // 頭盔爆傷
+        const glovesPrecision = toNumber("glovesPrecision") / 100;   // 手套命中
+        const neckLife = toNumber("necklaceLife");              // 項鍊生命
+
         const ammoM = getAmmoMultiplier();
         const pillM = getPillMultiplier();
         const buffDebuffM = getBuffDebuffMultiplier();
@@ -731,20 +853,9 @@
 
         externalMultiplier = ammoM * pillM * buffDebuffM * rankM;
 
-        // weaponDamage 會在 baseAttack 中疊加
-        // 其他裝備加成（crit chance, crit dmg, precision, armor, dodge）會加在對應 stat 中
+        // 這裡僅把裝備影響整合進 multiplier，實際上你也可以細分到 Attack / Precision / Life 等
+        // 若要更精細，可在這裡拆開計算並回填到對應屬性
       }
-
-      // 定義三種流派（若 useAdvanced=no，只計算平衡流）
-      const flows = useAdvanced === "yes"
-        ? [
-            { key: "conservative", label: "穩健流", desc: "偏重命中與生存，減少傷害波動。" },
-            { key: "balanced", label: "平衡流", desc: "兼顧命中與暴擊，在穩定與爆發之間取平衡。" },
-            { key: "burst", label: "爆發流", desc: "偏重攻擊與暴擊倍率，追求最高爆發傷害。" }
-          ]
-        : [
-            { key: "balanced", label: "平衡流", desc: "在可用技能點下給出一組較均衡的戰鬥加點。" }
-          ];
 
       const allocationTbody = document.querySelector("#allocationTable tbody");
       const damageTbody = document.querySelector("#damageTable tbody");
@@ -754,29 +865,24 @@
       let bestDpd = -1;
       let bestFlowLabel = "";
 
+      const flows = [
+        { key: "conservative", label: "穩健流 Conservative", desc: "偏向命中與生存，適合穩定輸出。" },
+        { key: "balanced", label: "平衡流 Balanced", desc: "攻防兼具，中庸且穩定。" },
+        { key: "burst", label: "爆發流 Burst", desc: "強調高傷害與爆擊，適合短期高輸出。" }
+      ];
+
       flows.forEach(flow => {
-        const alloc = allocatePoints(flow.key, Math.max(availablePoints, 0));
-
-        // 基礎戰鬥技能
+        const alloc = allocatePoints(flow.key, availablePoints);
         const baseStats = levelToCombatStats(alloc);
-        let { A_skill, P_used, C, Dc } = baseStats;
+        let { Askill, Pused, C, Dc } = baseStats;
 
-        // 進階裝備加成調整
+        // 若有裝備與進階倍率，將其加進整體傷害計算
+        let baseAttack = Askill;
         if (useAdvanced === "yes") {
-          const weaponDamage = toNumber("weaponDamage");
-          const weaponCritChance = toNumber("weaponCritChance") / 100;
-          const helmetCritDamage = toNumber("helmetCritDamage") / 100;
-          const glovesPrecision = toNumber("glovesPrecision") / 100;
-
-          A_skill += weaponDamage;
-          C = clamp(C + weaponCritChance, 0, 1);
-          Dc = Dc + helmetCritDamage;
-          P_used = clamp(P_used + glovesPrecision, 0, 1);
+          baseAttack = Askill * externalMultiplier;
         }
 
-        // 最終攻擊力
-        const baseAttack = A_skill * (useAdvanced === "yes" ? externalMultiplier : 1.0);
-        const expected = computeExpectedDamage(baseAttack, P_used, C, Dc);
+        const expected = computeExpectedDamage(baseAttack, Pused, C, Dc);
         const cycleD = computeCycleAndDPD(expected, dailyHealth);
 
         if (cycleD.dpd > bestDpd) {
@@ -784,7 +890,7 @@
           bestFlowLabel = flow.label;
         }
 
-        // 加點表
+        // 加點分配表
         const trAlloc = document.createElement("tr");
         trAlloc.innerHTML = `
           <td><div class="flow-name">${flow.label}</div></td>
@@ -799,7 +905,7 @@
         `;
         allocationTbody.appendChild(trAlloc);
 
-        // 傷害表
+        // 傷害與 DPD 表
         const trDmg = document.createElement("tr");
         trDmg.innerHTML = `
           <td>${flow.label}</td>
@@ -811,43 +917,42 @@
       });
 
       const topDpdText = document.getElementById("topDpdText");
-      if (bestDpd >= 0) {
-        topDpdText.textContent = `目前在你的設定下，DPD 最高的是「${bestFlowLabel}」，約為 ${fmt2(bestDpd)} 點傷害／日。`;
+      if (bestDpd > 0) {
+        topDpdText.textContent = `DPD 最高的流派為：${bestFlowLabel}，約為 ${fmt2(bestDpd)}。`;
       } else {
         topDpdText.textContent = "";
       }
     }
 
-    // ===== 事件綁定 =====
+    // ======== 初始事件綁定 ========
     document.addEventListener("DOMContentLoaded", () => {
+      // 初始計算（讓第一部分一載入就有數值）
       updatePointsAndDaily();
       updateAdvancedVisibility();
       updateSlidersLabel();
 
+      // 第一部分：等級與技能等級變動 → 重新計算可用戰鬥技能點＆每日體力
       document.getElementById("levelInput").addEventListener("input", updatePointsAndDaily);
       document.getElementById("hungerSkillUsed").addEventListener("input", updatePointsAndDaily);
       document.getElementById("ecoSkill1Used").addEventListener("input", updatePointsAndDaily);
       document.getElementById("ecoSkill2Used").addEventListener("input", updatePointsAndDaily);
       document.getElementById("ecoSkill3Used").addEventListener("input", updatePointsAndDaily);
-      document.getElementById("hungerMaxInput").addEventListener("input", updatePointsAndDaily);
-      document.querySelectorAll('input[name="foodType"]').forEach(el => {
+      document.querySelectorAll("input[name='foodType']").forEach(el => {
         el.addEventListener("change", updatePointsAndDaily);
       });
 
-      document.querySelectorAll('input[name="useAdvanced"]').forEach(el => {
-        el.addEventListener("change", () => {
-          updateAdvancedVisibility();
-        });
+      // 是否使用進階設定 → 顯示／隱藏第二部分
+      document.querySelectorAll("input[name='useAdvanced']").forEach(el => {
+        el.addEventListener("change", updateAdvancedVisibility);
       });
 
+      // Slider 顯示文字
       document.getElementById("pillSlider").addEventListener("input", updateSlidersLabel);
       document.getElementById("buffSlider").addEventListener("input", updateSlidersLabel);
       document.getElementById("debuffSlider").addEventListener("input", updateSlidersLabel);
 
+      // 計算按鈕 → 執行第三部分邏輯
       document.getElementById("calcButton").addEventListener("click", runCalculation);
-
-      // 第一部分一開始展開，結果區先不顯示，只有點「開始計算」後展開
-      // 已在 HTML 預設 display:none
     });
   </script>
 </body>
